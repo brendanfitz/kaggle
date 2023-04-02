@@ -1,6 +1,8 @@
 import plotly.graph_objects as go
 from transformers import create_landmark_lines
 
+GRAPH_SIZE = 750
+
 def create_traces(seq, lm_type):
     mask = seq.landmarks.type == lm_type
     landmarks = seq.landmarks.loc[mask, ]
@@ -31,3 +33,16 @@ CAMERAS = dict(
         eye=dict(x=-1.5, y=1, z=-2.5)
     ),
 )
+
+def change_visible_frame(lm_type, fig, frames, selected_frame):
+    traces = fig.data
+    for i, frame in enumerate(frames):
+        traces[i].visible = frame == selected_frame
+    
+    fig.update_layout(
+        scene_camera=CAMERAS[lm_type],
+        height=GRAPH_SIZE, width=GRAPH_SIZE,
+        title=dict(text=lm_type.replace('_', ' ').title(),
+                   x=0.5, y=0.9, xanchor='center', yanchor='top'),
+    )
+    return fig

@@ -3,14 +3,12 @@ from dash import dcc, html, Input, Output
 import plotly.graph_objects as go
 from extractors import LandmarkSequence
 from transformers import create_landmark_lines
-from visualizers import create_traces, CAMERAS
+from visualizers import create_traces, change_visible_frame
 import plotly.express as px
 
-GRAPH_SIZE = 750
-LM_TYPES = ['left_hand', 'pose', 'right_hand']
+LM_TYPES = ['right_hand', 'pose', 'left_hand']
 
 seq = LandmarkSequence('1000210073')
-
 
 figures = {
     lm_type: go.Figure(data=create_traces(seq, lm_type), layout=go.Layout(title=lm_type))
@@ -39,44 +37,20 @@ app.layout = html.Div(children=[
 
 @app.callback(Output('pose', 'figure'), [Input('frame-picker', 'value')])
 def update_figure(selected_frame):
-    traces = figures['pose'].data
-    for i, frame in enumerate(seq.frames):
-        traces[i].visible = frame == selected_frame
-    
-    fig = go.Figure(dict(data=traces))
-    fig.update_layout(
-        scene_camera=CAMERAS['pose'],
-        height=GRAPH_SIZE, width=GRAPH_SIZE,
-        title='pose',
-    )
+    lm_type = 'pose'
+    fig = change_visible_frame(lm_type, figures[lm_type], seq.frames, selected_frame)
     return fig
 
 @app.callback(Output('left_hand', 'figure'), [Input('frame-picker', 'value')])
 def update_figure_lh(selected_frame):
-    traces = figures['left_hand'].data
-    for i, frame in enumerate(seq.frames):
-        traces[i].visible = frame == selected_frame
-    
-    fig = go.Figure(dict(data=traces), figures['left_hand'].layout)
-    fig.update_layout(
-        scene_camera=CAMERAS['left_hand'],
-        height=GRAPH_SIZE, width=GRAPH_SIZE,
-        title='Left Hand'
-    )
+    lm_type = 'left_hand'
+    fig = change_visible_frame(lm_type, figures[lm_type], seq.frames, selected_frame)
     return fig
         
 @app.callback(Output('right_hand', 'figure'), [Input('frame-picker', 'value')])
 def update_figure_lh(selected_frame):
-    traces = figures['right_hand'].data
-    for i, frame in enumerate(seq.frames):
-        traces[i].visible = frame == selected_frame
-    
-    fig = go.Figure(dict(data=traces), figures['right_hand'].layout)
-    fig.update_layout(
-        scene_camera=CAMERAS['right_hand'],
-        height=GRAPH_SIZE, width=GRAPH_SIZE,
-        title='Right Hand'
-    )
+    lm_type = 'right_hand'
+    fig = change_visible_frame(lm_type, figures[lm_type], seq.frames, selected_frame)
     return fig
         
 
