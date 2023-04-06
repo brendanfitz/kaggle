@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+from transformers import interpolate_values
 
 path = Path.home() / '.data' / 'asl-signs'
 
@@ -14,15 +15,18 @@ class LandmarkSequence:
     LANDMARK_TYPES = ['left_hand', 'pose', 'right_hand']
     SIGN_META = fetch_sign_meta()
     
-    def __init__(self, sequence_id):
+    def __init__(self, sequence_id, interpolate=False):
         self.sequence_id = sequence_id
+        self.interpolate = interpolate
+
         self.meta = self.SIGN_META.loc[self.sequence_id, :]
         self.landmarks = self.read_parquet(self.meta['path'])
+        if interpolate:
+            self.landmarks = interpolate_values(self.landmarks)
+        
         self.frames = self.landmarks.frame.unique().tolist()
     
     def read_parquet(self, pq_name):
         landmarks = pd.read_parquet(path / pq_name)
         landmarks = landmarks.loc[landmarks.type.isin(self.LANDMARK_TYPES), ]
-        pose_mask = landmarks.loc[:, 'type'] == 'pose'
-        landmarks.loc[pose_mask, 'x'] = -landmarks.loc[pose_mask, 'x']
         return landmarks

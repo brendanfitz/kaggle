@@ -13,7 +13,7 @@ seq = LandmarkSequence('1002052130')
 graph_style = dict(width='30%', display='inline-block')
 
 sign = 'TV'
-sequences = seq.SIGN_META.loc[seq.SIGN_META.sign == sign, ].index.tolist()
+sequences = LandmarkSequence.SIGN_META.loc[seq.SIGN_META.sign == sign, ].index.tolist()
 
 figures = {
     lm_type: go.Figure(data=create_traces(seq, lm_type), layout=go.Layout(title=lm_type))
@@ -29,7 +29,7 @@ app.layout = html.Div(children=[
         children=[
             dcc.Dropdown(
                 id='sign-selector',
-                options=seq.SIGN_META.sign.unique(),
+                options=seq.SIGN_META.sign.sort_values().unique(),
                 value=sign,
             ),
             dcc.Dropdown(

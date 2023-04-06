@@ -35,3 +35,13 @@ def create_landmark_lines(frame_landmarks, landmarks_type):
                           for i in line_indices
                          ])
     return lines
+
+def interpolate_values(landmarks):
+    inter_dims = ['type', 'landmark_index']
+    landmarks = (landmarks.sort_values(['type', 'landmark_index', 'frame'])
+                 .assign(x=lambda x: x.groupby(inter_dims, group_keys=False).x.apply(lambda g: g.interpolate()),
+                         y=lambda x: x.groupby(inter_dims, group_keys=False).y.apply(lambda g: g.interpolate()),
+                         z=lambda x: x.groupby(inter_dims, group_keys=False).z.apply(lambda g: g.interpolate()),
+                  )
+                )
+    return landmarks
